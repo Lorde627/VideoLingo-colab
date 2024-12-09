@@ -117,6 +117,12 @@ def check_requirements_satisfied():
         return False
 
 def main():
+    # Initialize console at the start of main function
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.box import DOUBLE
+    console = Console()
+    
     if is_colab():
         console.print(Panel("🎮 Running in Google Colab environment", style="cyan"))
         
@@ -130,10 +136,6 @@ def main():
             return
     
     install_package("requests", "rich", "ruamel.yaml")
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.box import DOUBLE
-    console = Console()
     
     width = max(len(line) for line in ascii_logo.splitlines()) + 4
     welcome_panel = Panel(
