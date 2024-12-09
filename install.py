@@ -85,7 +85,50 @@ def check_ffmpeg():
             ))
             raise SystemExit("FFmpeg is required. Please install it and run the installer again.")
 
+def check_package_version(package_name):
+    try:
+        import pkg_resources
+        version = pkg_resources.get_distribution(package_name).version
+        return version
+    except pkg_resources.DistributionNotFound:
+        return None
+
+def check_requirements_satisfied():
+    try:
+        with open('requirements.txt', 'r') as f:
+            requirements = f.read().splitlines()
+        
+        # 过滤掉注释和空行
+        requirements = [r.strip() for r in requirements if r.strip() and not r.startswith('#')]
+        
+        for req in requirements:
+            # 处理包名和版本号
+            if '==' in req:
+                package_name = req.split('==')[0]
+            elif '>=' in req:
+                package_name = req.split('>=')[0]
+            else:
+                package_name = req
+            
+            if check_package_version(package_name) is None:
+                return False
+        return True
+    except FileNotFoundError:
+        return False
+
 def main():
+    if is_colab():
+        console.print(Panel("🎮 Running in Google Colab environment", style="cyan"))
+        
+        # 检查是否已经满足所有依赖
+        if check_requirements_satisfied():
+            console.print(Panel("✅ All required packages are already installed", style="green"))
+            check_ffmpeg()
+            console.print(Panel.fit("Ready to use!", style="bold green"))
+            console.print("To start the application, run:")
+            console.print("[bold cyan]streamlit run st.py[/bold cyan]")
+            return
+    
     install_package("requests", "rich", "ruamel.yaml")
     from rich.console import Console
     from rich.panel import Panel
